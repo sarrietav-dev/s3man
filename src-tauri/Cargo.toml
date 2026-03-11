@@ -1,6 +1,6 @@
 [package]
 name = "s3man"
-version = "0.1.0"
+version = "0.1.1"
 description = "Cross-platform S3 desktop manager"
 authors = ["Sebas"]
 license = "MIT"

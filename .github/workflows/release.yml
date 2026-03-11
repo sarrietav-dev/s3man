@@ -51,10 +51,15 @@ jobs:
         run: npm ci
 
       - name: Set RPM signing vars
-        if: ${{ secrets.TAURI_SIGNING_RPM_KEY != '' }}
+        if: matrix.runner == 'ubuntu-22.04'
+        env:
+          RPM_KEY: ${{ secrets.TAURI_SIGNING_RPM_KEY }}
+          RPM_KEY_PASSPHRASE: ${{ secrets.TAURI_SIGNING_RPM_KEY_PASSPHRASE }}
         run: |
-          echo "TAURI_SIGNING_RPM_KEY=${{ secrets.TAURI_SIGNING_RPM_KEY }}" >> "$GITHUB_ENV"
-          echo "TAURI_SIGNING_RPM_KEY_PASSPHRASE=${{ secrets.TAURI_SIGNING_RPM_KEY_PASSPHRASE }}" >> "$GITHUB_ENV"
+          if [ -n "$RPM_KEY" ]; then
+            echo "TAURI_SIGNING_RPM_KEY=$RPM_KEY" >> "$GITHUB_ENV"
+            echo "TAURI_SIGNING_RPM_KEY_PASSPHRASE=$RPM_KEY_PASSPHRASE" >> "$GITHUB_ENV"
+          fi
 
       - name: Build and upload release assets
         uses: tauri-apps/tauri-action@v0

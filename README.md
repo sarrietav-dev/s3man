@@ -1,86 +1,100 @@
 # s3man
 
-Cross-platform S3 desktop manager built with Tauri + React + TypeScript.
+> Cross-platform S3 desktop manager — browse, upload, and organize your S3 buckets from a native desktop app.
 
-## Build
+Built with [Tauri](https://tauri.app) + React + TypeScript.
+
+![s3man screenshot](screenshot.png)
+
+## Features
+
+- **Multiple connections** — save and switch between S3 connections by name
+- **File browser** — navigate folders, view file sizes and modification dates
+- **Upload files** — drag or select files to upload directly from the app
+- **New folder** — create directories without leaving the UI
+- **Refresh** — sync the current view with the latest bucket state
+- **Native feel** — frameless window, keyboard shortcut (`Ctrl/Cmd+B`) to toggle the sidebar
+
+## Installation
+
+Download the latest release for your platform from the [Releases](../../releases) page:
+
+| Platform | Format |
+|---|---|
+| Windows | `.msi`, `.exe` (NSIS) |
+| macOS | `.app`, `.dmg` |
+| Linux (Ubuntu/Debian) | `.deb` |
+| Linux (Fedora/RHEL) | `.rpm` |
+| Linux (Arch) | AUR (`s3man`) |
+
+## Development
+
+**Prerequisites**: [Node.js](https://nodejs.org) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS (Rust, system WebView).
+
+```bash
+npm install
+npm run tauri dev
+```
+
+## Building
 
 ```bash
 npm install
 npm run dist
 ```
 
-The bundle output is written to `src-tauri/target/release/bundle`.
+Output is written to `src-tauri/target/release/bundle`.
 
-## Distribution targets
-
-This project is configured for:
-
-- Windows: `msi`, `nsis`
-- macOS: `app`, `dmg`
-- Linux: `deb`, `rpm` (plus optional `appimage`)
-
-Commands:
+### Platform-specific builds
 
 ```bash
-npm run dist:linux
-npm run dist:linux:all
-npm run dist:mac
-npm run dist:windows
+npm run dist:linux      # .deb + .rpm
+npm run dist:linux:all  # .deb + .rpm + .AppImage
+npm run dist:mac        # .app + .dmg
+npm run dist:windows    # .msi + .exe (NSIS)
 ```
 
-## Linux channels
+### AUR package
 
-### Ubuntu/Debian (.deb)
-
-- Build with `npm run dist:linux`
-- Artifact path: `src-tauri/target/release/bundle/deb`
-
-### Fedora (.rpm)
-
-- Build with `npm run dist:linux`
-- Artifact path: `src-tauri/target/release/bundle/rpm`
-
-### AUR
-
-Generate a `PKGBUILD` + install hook from built Debian artifacts:
+Generate a `PKGBUILD` and install hook from the built Debian artifacts:
 
 ```bash
 RELEASE_BASE_URL="https://github.com/<owner>/<repo>/releases/download/v0.1.0" npm run dist:aur
 ```
 
-Generated files:
+This produces `dist/aur/PKGBUILD` and `dist/aur/s3man.install`. After generating, run `makepkg --printsrcinfo > .SRCINFO` in your AUR repo and push.
 
-- `dist/aur/PKGBUILD`
-- `dist/aur/s3man.install`
+## Releases
 
-After generation, run `makepkg --printsrcinfo > .SRCINFO` in your AUR repo and push.
+Automated release workflow: `.github/workflows/release.yml`
 
-## Notes on signing
-
-- macOS signing/notarization: configure Apple signing env vars and identities for release builds.
-- Windows signing: configure certificate/signing command in Tauri bundle settings for SmartScreen trust.
-- Linux signing: RPM signing can be configured through `TAURI_SIGNING_RPM_KEY` env vars.
-
-## GitHub releases
-
-Automated release workflow: `.github/workflows/release.yml`.
-
-- Trigger: push a tag like `v0.1.0`
-- Builds and uploads:
-  - Linux: `.deb`, `.rpm`
-  - Windows: `.msi`, `.nsis`
-  - macOS: `.app`, `.dmg` (arm64 and x64 targets)
-- Generates and attaches `dist/aur/PKGBUILD` and `dist/aur/s3man.install` to the same GitHub Release
-
-Create and push a release tag:
+**Trigger**: push a version tag.
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-Recommended repository secrets for signed release builds:
+The workflow builds and uploads all platform artifacts (`.deb`, `.rpm`, `.msi`, `.exe`, `.app`, `.dmg`) and attaches the AUR `PKGBUILD` to the GitHub Release.
 
-- Apple: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `APPLE_API_ISSUER`, `APPLE_API_KEY`, `APPLE_API_KEY_PATH`
-- Windows: `WINDOWS_CERTIFICATE`, `WINDOWS_CERTIFICATE_PASSWORD`
-- Linux RPM: `TAURI_SIGNING_RPM_KEY`, `TAURI_SIGNING_RPM_KEY_PASSPHRASE`
+### Signing
+
+For signed release builds, configure the following repository secrets:
+
+<details>
+<summary>macOS</summary>
+
+`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `APPLE_API_ISSUER`, `APPLE_API_KEY`, `APPLE_API_KEY_PATH`
+</details>
+
+<details>
+<summary>Windows</summary>
+
+`WINDOWS_CERTIFICATE`, `WINDOWS_CERTIFICATE_PASSWORD`
+</details>
+
+<details>
+<summary>Linux (RPM)</summary>
+
+`TAURI_SIGNING_RPM_KEY`, `TAURI_SIGNING_RPM_KEY_PASSPHRASE`
+</details>

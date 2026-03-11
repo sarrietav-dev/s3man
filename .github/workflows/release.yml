@@ -1,0 +1,109 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish-tauri:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64
+            runner: ubuntu-22.04
+            args: --bundles deb,rpm
+          - name: windows-x64
+            runner: windows-latest
+            args: --bundles msi,nsis
+          - name: macos-arm64
+            runner: macos-latest
+            args: --bundles app,dmg --target aarch64-apple-darwin
+          - name: macos-x64
+            runner: macos-latest
+            args: --bundles app,dmg --target x86_64-apple-darwin
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: matrix.runner == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build and upload release assets
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          TAURI_SIGNING_RPM_KEY: ${{ secrets.TAURI_SIGNING_RPM_KEY }}
+          TAURI_SIGNING_RPM_KEY_PASSPHRASE: ${{ secrets.TAURI_SIGNING_RPM_KEY_PASSPHRASE }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: s3man ${{ github.ref_name }}
+          releaseBody: See assets to download and install this version.
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      - name: Compute AUR metadata
+        if: matrix.name == 'linux-x64'
+        shell: bash
+        run: |
+          echo "APP_VERSION=$(node -p \"require('./src-tauri/tauri.conf.json').version\")" >> "$GITHUB_ENV"
+          echo "SHA_AMD64=$(sha256sum src-tauri/target/release/bundle/deb/s3man_$(node -p \"require('./src-tauri/tauri.conf.json').version\")_amd64.deb | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Generate AUR files
+        if: matrix.name == 'linux-x64'
+        shell: bash
+        env:
+          RELEASE_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}
+          SHA_AMD64: ${{ env.SHA_AMD64 }}
+          SHA_ARM64: REPLACE_WITH_ARM64_SHA256
+        run: npm run dist:aur
+
+      - name: Attach AUR assets to release
+        if: matrix.name == 'linux-x64'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/aur/PKGBUILD
+            dist/aur/s3man.install

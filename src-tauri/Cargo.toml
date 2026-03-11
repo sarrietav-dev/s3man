@@ -1,8 +1,9 @@
 [package]
 name = "s3man"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Cross-platform S3 desktop manager"
+authors = ["Sebas"]
+license = "MIT"
 edition = "2021"
 
 [lib]

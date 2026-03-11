@@ -12,11 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "s3man",
-        "width": 1200,
-        "height": 780,
-        "minWidth": 900,
-        "minHeight": 600
+        "decorations": false
       }
     ],
     "security": {
@@ -25,13 +21,56 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "msi",
+      "nsis",
+      "app",
+      "dmg",
+      "appimage",
+      "deb",
+      "rpm"
+    ],
+    "category": "Utility",
+    "shortDescription": "Cross-platform S3 desktop manager",
+    "copyright": "Copyright (c) 2026",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.13",
+      "hardenedRuntime": true
+    },
+    "linux": {
+      "deb": {
+        "section": "utils",
+        "priority": "optional",
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libgtk-3-0"
+        ]
+      },
+      "rpm": {
+        "epoch": 0,
+        "release": "1",
+        "depends": [
+          "webkit2gtk4.1",
+          "gtk3"
+        ]
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
   }
 }

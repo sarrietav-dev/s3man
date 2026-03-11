@@ -1,0 +1,26 @@
+pkgname=@APP_NAME@-bin
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc="Cross-platform S3 desktop manager"
+arch=('x86_64' 'aarch64')
+url="https://github.com/OWNER/REPO"
+license=('MIT')
+depends=('cairo' 'desktop-file-utils' 'gdk-pixbuf2' 'glib2' 'gtk3' 'hicolor-icon-theme' 'libsoup' 'pango' 'webkit2gtk-4.1')
+options=('!strip' '!debug')
+install=@APP_NAME@.install
+source_x86_64=("@RELEASE_BASE_URL@/@DEB_AMD64@")
+source_aarch64=("@RELEASE_BASE_URL@/@DEB_ARM64@")
+sha256sums_x86_64=('@SHA_AMD64@')
+sha256sums_aarch64=('@SHA_ARM64@')
+
+package() {
+  local deb_file
+  if [[ "${CARCH}" == "x86_64" ]]; then
+    deb_file="@DEB_AMD64@"
+  else
+    deb_file="@DEB_ARM64@"
+  fi
+
+  bsdtar -xf "${srcdir}/${deb_file}" -C "${srcdir}"
+  bsdtar -xf "${srcdir}/data.tar.xz" -C "${pkgdir}"
+}

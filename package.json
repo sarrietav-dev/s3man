@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dist": "tauri build",
+    "dist:linux": "tauri build --bundles deb,rpm",
+    "dist:linux:all": "tauri build --bundles appimage,deb,rpm",
+    "dist:mac": "tauri build --bundles app,dmg",
+    "dist:windows": "tauri build --bundles msi,nsis",
+    "dist:aur": "bash scripts/release/generate-aur.sh"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { Toaster } from "./components/ui/sonner";
-import { SidebarProvider, SidebarInset } from "./components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+  SidebarSeparator,
+} from "./components/ui/sidebar";
 import { ConnectionSidebar } from "./components/ConnectionSidebar";
 import { FileBrowser } from "./components/FileBrowser";
 import { api } from "./lib/api";
@@ -26,6 +31,15 @@ function App() {
         onConnectionsChange={setConnections}
       />
       <SidebarInset>
+        <header className="h-12 border-b border-border flex items-center px-3 gap-2 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+          <SidebarTrigger className="-ml-1" />
+          <SidebarSeparator className="mr-1 h-4" />
+          <p className="text-sm text-muted-foreground truncate">
+            {selectedConnection
+              ? `Connected to ${selectedConnection.name}`
+              : "Select a connection"}
+          </p>
+        </header>
         {selectedConnection ? (
           <FileBrowser connection={selectedConnection} />
         ) : (

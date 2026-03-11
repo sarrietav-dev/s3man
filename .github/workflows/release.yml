@@ -57,7 +57,12 @@ jobs:
           RPM_KEY_PASSPHRASE: ${{ secrets.TAURI_SIGNING_RPM_KEY_PASSPHRASE }}
         run: |
           if [ -n "$RPM_KEY" ]; then
-            echo "TAURI_SIGNING_RPM_KEY=$RPM_KEY" >> "$GITHUB_ENV"
+            # Use heredoc syntax — required for multi-line PGP key blocks
+            {
+              echo "TAURI_SIGNING_RPM_KEY<<GPG_EOF"
+              echo "$RPM_KEY"
+              echo "GPG_EOF"
+            } >> "$GITHUB_ENV"
             echo "TAURI_SIGNING_RPM_KEY_PASSPHRASE=$RPM_KEY_PASSPHRASE" >> "$GITHUB_ENV"
           fi
 

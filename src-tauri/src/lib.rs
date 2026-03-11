@@ -2,7 +2,7 @@ mod models;
 mod s3ops;
 mod storage;
 
-use models::{Connection, ConnectionInput, S3Object};
+use models::{BulkUploadItem, Connection, ConnectionInput, S3Object};
 use std::sync::Mutex;
 use uuid::Uuid;
 
@@ -115,6 +115,23 @@ async fn upload_file(
 }
 
 #[tauri::command]
+async fn bulk_upload_files(
+    connection_id: String,
+    files: Vec<BulkUploadItem>,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    let conn = {
+        let connections = state.connections.lock().unwrap();
+        connections
+            .iter()
+            .find(|c| c.id == connection_id)
+            .cloned()
+            .ok_or_else(|| "connection not found".to_string())?
+    };
+    s3ops::upload_files(&conn, files).await
+}
+
+#[tauri::command]
 async fn download_file(
     connection_id: String,
     key: String,
@@ -130,6 +147,25 @@ async fn download_file(
             .ok_or_else(|| "connection not found".to_string())?
     };
     s3ops::download_file(&conn, &key, &save_path).await
+}
+
+#[tauri::command]
+async fn bulk_download_files(
+    connection_id: String,
+    keys: Vec<String>,
+    save_path: String,
+    base_prefix: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    let conn = {
+        let connections = state.connections.lock().unwrap();
+        connections
+            .iter()
+            .find(|c| c.id == connection_id)
+            .cloned()
+            .ok_or_else(|| "connection not found".to_string())?
+    };
+    s3ops::download_files(&conn, keys, &save_path, &base_prefix).await
 }
 
 #[tauri::command]
@@ -202,7 +238,9 @@ pub fn run() {
             test_connection,
             list_objects,
             upload_file,
+            bulk_upload_files,
             download_file,
+            bulk_download_files,
             delete_object,
             delete_objects,
             create_folder,

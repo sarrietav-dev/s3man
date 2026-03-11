@@ -52,6 +52,7 @@ export function FileBrowser({ connection }: Props) {
   const [folderDialogOpen, setFolderDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
+  const [bulkDownloading, setBulkDownloading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -101,22 +102,25 @@ export function FileBrowser({ connection }: Props) {
   async function handleUpload() {
     const paths = await pickFilesToUpload();
     if (!paths || paths.length === 0) return;
+
+    const files = paths.map((filePath) => {
+      const filename = filePath.split(/[\\/]/).pop() ?? filePath;
+      const normalizedPrefix = prefix && !prefix.endsWith("/") ? `${prefix}/` : prefix;
+      return {
+        key: normalizedPrefix + filename,
+        filePath,
+      };
+    });
+
     setUploading(true);
-    let successCount = 0;
-    for (const filePath of paths) {
-      const filename = filePath.split("/").pop() ?? filePath.split("\\").pop() ?? filePath;
-      const key = prefix + filename;
-      try {
-        await api.uploadFile(connection.id, key, filePath);
-        successCount++;
-      } catch (err) {
-        toast.error(`Failed to upload ${filename}: ${String(err)}`);
-      }
-    }
-    setUploading(false);
-    if (successCount > 0) {
-      toast.success(`Uploaded ${successCount} file${successCount > 1 ? "s" : ""}`);
+    try {
+      await api.bulkUploadFiles(connection.id, files);
+      toast.success(`Uploaded ${files.length} file${files.length > 1 ? "s" : ""}`);
       load();
+    } catch (err) {
+      toast.error(`Bulk upload failed: ${String(err)}`);
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -153,6 +157,24 @@ export function FileBrowser({ connection }: Props) {
     }
   }
 
+  async function handleBulkDownload() {
+    const keys = Array.from(selected);
+    if (keys.length === 0) return;
+
+    const savePath = await pickSavePath("s3man-bulk-download.zip");
+    if (!savePath) return;
+
+    setBulkDownloading(true);
+    try {
+      await api.bulkDownloadFiles(connection.id, keys, savePath, prefix);
+      toast.success("Bulk download zip created");
+    } catch (err) {
+      toast.error(`Bulk download failed: ${String(err)}`);
+    } finally {
+      setBulkDownloading(false);
+    }
+  }
+
   const breadcrumbs = buildBreadcrumbs(prefix);
   const folders = objects.filter((o) => o.is_prefix);
   const files = objects.filter((o) => !o.is_prefix);
@@ -164,8 +186,10 @@ export function FileBrowser({ connection }: Props) {
         breadcrumbs={breadcrumbs}
         selected={selected}
         uploading={uploading}
+        bulkDownloading={bulkDownloading}
         onNavigate={navigate}
         onUpload={handleUpload}
+        onBulkDownload={handleBulkDownload}
         onRefresh={load}
         onCreateFolder={() => setFolderDialogOpen(true)}
         onDeleteSelected={() => setDeleteKeys(Array.from(selected))}
@@ -281,8 +305,10 @@ function Toolbar({
   breadcrumbs,
   selected,
   uploading,
+  bulkDownloading,
   onNavigate,
   onUpload,
+  onBulkDownload,
   onRefresh,
   onCreateFolder,
   onDeleteSelected,
@@ -291,8 +317,10 @@ function Toolbar({
   breadcrumbs: { label: string; prefix: string }[];
   selected: Set<string>;
   uploading: boolean;
+  bulkDownloading: boolean;
   onNavigate: (prefix: string) => void;
   onUpload: () => void;
+  onBulkDownload: () => void;
   onRefresh: () => void;
   onCreateFolder: () => void;
   onDeleteSelected: () => void;
@@ -333,6 +361,19 @@ function Toolbar({
           {selected.size > 0 && (
             <>
               <span className="text-xs text-muted-foreground">{selected.size} selected</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onBulkDownload}
+                disabled={bulkDownloading}
+              >
+                {bulkDownloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                Download
+              </Button>
               <Button
                 variant="destructive"
                 size="sm"

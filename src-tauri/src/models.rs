@@ -29,3 +29,10 @@ pub struct S3Object {
     pub is_prefix: bool,
     pub etag: Option<String>,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkUploadItem {
+    pub key: String,
+    pub file_path: String,
+}

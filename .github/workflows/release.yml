@@ -93,8 +93,8 @@ jobs:
         if: matrix.name == 'linux-x64'
         shell: bash
         run: |
-          echo "APP_VERSION=$(node -p \"require('./src-tauri/tauri.conf.json').version\")" >> "$GITHUB_ENV"
-          echo "SHA_AMD64=$(sha256sum src-tauri/target/release/bundle/deb/s3man_$(node -p \"require('./src-tauri/tauri.conf.json').version\")_amd64.deb | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$(node -p 'require("./src-tauri/tauri.conf.json").version')" >> "$GITHUB_ENV"
+          echo "SHA_AMD64=$(sha256sum src-tauri/target/release/bundle/deb/s3man_$(node -p 'require("./src-tauri/tauri.conf.json").version')_amd64.deb | cut -d' ' -f1)" >> "$GITHUB_ENV"
 
       - name: Generate AUR files
         if: matrix.name == 'linux-x64'

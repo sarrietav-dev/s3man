@@ -2,6 +2,15 @@
   "name": "s3man",
   "private": true,
   "version": "0.1.0",
+  "description": "Cross-platform S3 desktop manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarrietav-dev/s3man.git"
+  },
+  "homepage": "https://github.com/sarrietav-dev/s3man",
+  "bugs": {
+    "url": "https://github.com/sarrietav-dev/s3man/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

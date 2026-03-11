@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Cross-platform S3 desktop manager"
 authors = ["Sebas"]
 license = "MIT"
+repository = "https://github.com/sarrietav-dev/s3man"
+homepage = "https://github.com/sarrietav-dev/s3man"
 edition = "2021"
 
 [lib]

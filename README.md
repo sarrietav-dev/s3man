@@ -59,7 +59,7 @@ npm run dist:windows    # .msi + .exe (NSIS)
 Generate a `PKGBUILD` and install hook from the built Debian artifacts:
 
 ```bash
-RELEASE_BASE_URL="https://github.com/<owner>/<repo>/releases/download/v0.1.0" npm run dist:aur
+RELEASE_BASE_URL="https://github.com/sarrietav-dev/s3man/releases/download/v0.1.0" npm run dist:aur
 ```
 
 This produces `dist/aur/PKGBUILD` and `dist/aur/s3man.install`. After generating, run `makepkg --printsrcinfo > .SRCINFO` in your AUR repo and push.

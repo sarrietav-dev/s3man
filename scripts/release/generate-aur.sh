@@ -20,7 +20,7 @@ fi
 APP_NAME="$(node -p "const c=require('${TAURI_CONF}'); c.productName.toLowerCase()")"
 VERSION="$(node -p "const c=require('${TAURI_CONF}'); c.version")"
 RELEASE_TAG="${RELEASE_TAG:-v${VERSION}}"
-RELEASE_BASE_URL="${RELEASE_BASE_URL:-https://github.com/OWNER/REPO/releases/download/${RELEASE_TAG}}"
+RELEASE_BASE_URL="${RELEASE_BASE_URL:-https://github.com/sarrietav-dev/s3man/releases/download/${RELEASE_TAG}}"
 
 DEB_AMD64="${APP_NAME}_${VERSION}_amd64.deb"
 DEB_ARM64="${APP_NAME}_${VERSION}_arm64.deb"

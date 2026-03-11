@@ -20,12 +20,6 @@ jobs:
           - name: windows-x64
             runner: windows-latest
             args: --bundles msi,nsis
-          - name: macos-arm64
-            runner: macos-latest
-            args: --bundles app,dmg --target aarch64-apple-darwin
-          - name: macos-x64
-            runner: macos-latest
-            args: --bundles app,dmg --target x86_64-apple-darwin
 
     runs-on: ${{ matrix.runner }}
 
@@ -47,8 +41,6 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -57,6 +49,12 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm ci
+
+      - name: Set RPM signing vars
+        if: ${{ secrets.TAURI_SIGNING_RPM_KEY != '' }}
+        run: |
+          echo "TAURI_SIGNING_RPM_KEY=${{ secrets.TAURI_SIGNING_RPM_KEY }}" >> "$GITHUB_ENV"
+          echo "TAURI_SIGNING_RPM_KEY_PASSPHRASE=${{ secrets.TAURI_SIGNING_RPM_KEY_PASSPHRASE }}" >> "$GITHUB_ENV"
 
       - name: Build and upload release assets
         uses: tauri-apps/tauri-action@v0
@@ -73,8 +71,6 @@ jobs:
           APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
           WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
           WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-          TAURI_SIGNING_RPM_KEY: ${{ secrets.TAURI_SIGNING_RPM_KEY }}
-          TAURI_SIGNING_RPM_KEY_PASSPHRASE: ${{ secrets.TAURI_SIGNING_RPM_KEY_PASSPHRASE }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: s3man ${{ github.ref_name }}

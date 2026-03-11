@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Gradient for the cloud/bucket -->
+    <linearGradient id="bucketGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <!-- Gradient for the S3 cube -->
+    <linearGradient id="cubeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    <!-- Gradient for the file/folder element -->
+    <linearGradient id="fileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:1" />
+    </linearGradient>
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with subtle gradient -->
+  <circle cx="256" cy="256" r="240" fill="#1e293b"/>
+  
+  <!-- S3 Bucket shape (cloud-like with flat bottom) -->
+  <path d="M128 280 Q128 200 200 180 Q220 120 300 130 Q380 110 400 180 Q460 200 460 280 Q460 360 400 380 L188 380 Q128 360 128 280 Z" 
+        fill="url(#bucketGradient)" 
+        filter="url(#shadow)"/>
+  
+  <!-- Inner highlight on bucket -->
+  <ellipse cx="280" cy="200" rx="100" ry="40" fill="rgba(255,255,255,0.15)"/>
+  
+  <!-- S3 Cube floating above -->
+  <g transform="translate(320, 100)">
+    <!-- Cube faces -->
+    <path d="M0 20 L35 0 L70 20 L35 40 Z" fill="#fcd34d"/>
+    <path d="M0 20 L0 55 L35 75 L35 40 Z" fill="#f59e0b"/>
+    <path d="M35 40 L35 75 L70 55 L70 20 Z" fill="#d97706"/>
+  </g>
+  
+  <!-- File/folder icon overlay -->
+  <g transform="translate(180, 220)">
+    <!-- Folder base -->
+    <rect x="0" y="20" width="120" height="80" rx="8" fill="url(#fileGradient)" filter="url(#shadow)"/>
+    <!-- Folder tab -->
+    <path d="M0 20 L0 35 Q0 40 5 40 L115 40 Q120 40 120 35 L120 20 L80 20 L70 10 L40 10 L30 20 Z" 
+          fill="#e2e8f0"/>
+    <!-- File lines -->
+    <rect x="15" y="55" width="90" height="6" rx="2" fill="#94a3b8"/>
+    <rect x="15" y="70" width="70" height="6" rx="2" fill="#94a3b8"/>
+    <rect x="15" y="85" width="80" height="6" rx="2" fill="#94a3b8"/>
+  </g>
+  
+  <!-- Connection lines (representing cloud connectivity) -->
+  <circle cx="150" cy="150" r="4" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="120" cy="180" r="3" fill="rgba(255,255,255,0.4)"/>
+  <circle cx="160" cy="120" r="2" fill="rgba(255,255,255,0.3)"/>
+  
+  <!-- Subtle grid pattern on background -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" fill="url(#grid)"/>
+</svg>

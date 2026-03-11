@@ -1,50 +1,54 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useState, useEffect } from "react";
 import "./App.css";
+import { Toaster } from "./components/ui/sonner";
+import { SidebarProvider, SidebarInset } from "./components/ui/sidebar";
+import { ConnectionSidebar } from "./components/ConnectionSidebar";
+import { FileBrowser } from "./components/FileBrowser";
+import { api } from "./lib/api";
+import { Connection } from "./types";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  useEffect(() => {
+    api.getConnections().then(setConnections);
+  }, []);
+
+  const selectedConnection = connections.find((c) => c.id === selectedId) ?? null;
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <SidebarProvider>
+      <ConnectionSidebar
+        connections={connections}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        onConnectionsChange={setConnections}
+      />
+      <SidebarInset>
+        {selectedConnection ? (
+          <FileBrowser connection={selectedConnection} />
+        ) : (
+          <EmptyState hasConnections={connections.length > 0} />
+        )}
+      </SidebarInset>
+      <Toaster position="bottom-right" />
+    </SidebarProvider>
+  );
+}
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+function EmptyState({ hasConnections }: { hasConnections: boolean }) {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <div className="text-center space-y-2">
+        <div className="text-4xl">🪣</div>
+        <p className="text-muted-foreground text-sm">
+          {hasConnections
+            ? "Select a connection to browse files"
+            : "Add a connection to get started"}
+        </p>
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    </div>
   );
 }
 
